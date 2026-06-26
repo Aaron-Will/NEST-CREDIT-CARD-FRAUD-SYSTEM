@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudShield - AI Fraud Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            font-family:'Inter',sans-serif;
+            min-height:100vh;
+            background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px
+        }
+        .container{
+            background:rgba(255,255,255,0.05);
+            backdrop-filter:blur(20px);
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:30px;
+            padding:40px;
+            max-width:1000px;
+            width:100%;
+            box-shadow:0 25px 50px -12px rgba(0,0,0,0.8)
+        }
+        .header{text-align:center;margin-bottom:35px}
+        .header-badge{
+            display:inline-block;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            padding:6px 20px;
+            border-radius:50px;
+            font-size:12px;
+            font-weight:600;
+            color:#fff;
+            text-transform:uppercase;
+            letter-spacing:2px;
+            margin-bottom:15px
+        }
+        .header h1{
+            font-size:2.8rem;
+            font-weight:900;
+            background:linear-gradient(135deg,#f093fb,#f5576c,#4facfe);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            margin-bottom:8px
+        }
+        .header p{color:rgba(255,255,255,0.6);font-size:1.05rem}
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:15px;
+            margin-bottom:30px
+        }
+        .stat-card{
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:16px;
+            padding:18px;
+            text-align:center
+        }
+        .stat-card .number{font-size:1.6rem;font-weight:800;color:#fff;display:block}
+        .stat-card .number.green{color:#4ade80}
+        .stat-card .number.red{color:#f87171}
+        .stat-card .number.blue{color:#60a5fa}
+        .stat-card .label{font-size:.75rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-top:4px;display:block}
+        .form-title{color:rgba(255,255,255,0.8);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;margin-bottom:20px}
+        .features-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:25px}
+        .input-group label{display:block;font-size:.75rem;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+        .input-group label i{margin-right:6px;color:#667eea}
+        .input-group input{
+            width:100%;
+            padding:12px 16px;
+            background:rgba(255,255,255,0.06);
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:12px;
+            color:#fff;
+            font-size:.95rem;
+            font-family:'Inter',sans-serif;
+            transition:all .3s;
+            outline:none
+        }
+        .input-group input::placeholder{color:rgba(255,255,255,0.25)}
+        .input-group input:focus{
+            background:rgba(255,255,255,0.08);
+            border-color:#667eea;
+            box-shadow:0 0 0 4px rgba(102,126,234,0.15)
+        }
+        .btn-submit{
+            width:100%;
+            padding:16px;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            border:none;
+            border-radius:14px;
+            color:#fff;
+            font-size:1.1rem;
+            font-weight:700;
+            font-family:'Inter',sans-serif;
+            cursor:pointer;
+            transition:all .3s;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:12px
+        }
+        .btn-submit:hover{
+            transform:translateY(-2px);
+            box-shadow:0 15px 30px -10px rgba(102,126,234,0.4)
+        }
+        .loading{display:none;text-align:center;margin-top:25px;padding:20px}
+        .loading.show{display:block}
+        .spinner{
+            width:48px;
+            height:48px;
+            border:3px solid rgba(255,255,255,0.1);
+            border-top:3px solid #667eea;
+            border-radius:50%;
+            animation:spin .8s linear infinite;
+            margin:0 auto 12px
+        }
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .result{margin-top:25px;padding:25px;border-radius:16px;display:none}
+        .result.show{display:block}
+        .result.fraud{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3)}
+        .result.safe{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25)}
+        .result-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+        .result-header .icon{font-size:2rem}
+        .result-header h2{font-size:1.4rem;font-weight:700;color:#fff}
+        .result p{color:rgba(255,255,255,0.7);font-size:.95rem;line-height:1.6}
+        .probability-container{margin-top:15px}
+        .probability-label{display:flex;justify-content:space-between;color:rgba(255,255,255,0.6);font-size:.85rem;margin-bottom:6px}
+        .probability-bar{width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:50px;overflow:hidden}
+        .probability-fill{
+            height:100%;
+            border-radius:50px;
+            transition:width 1s cubic-bezier(0.4,0,0.2,1);
+            background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171)
+        }
+        .risk-badge{
+            display:inline-block;
+            padding:4px 14px;
+            border-radius:50px;
+            font-size:.75rem;
+            font-weight:600;
+            text-transform:uppercase;
+            margin-top:10px
+        }
+        .risk-badge.low{background:rgba(74,222,128,0.2);color:#4ade80}
+        .risk-badge.medium{background:rgba(251,191,36,0.2);color:#fbbf24}
+        .risk-badge.high{background:rgba(248,113,113,0.2);color:#f87171}
+        .error{color:#f87171;text-align:center;margin-top:15px;padding:12px;background:rgba(239,68,68,0.1);border-radius:12px;display:none}
+        .error.show{display:block}
+        .footer{margin-top:30px;text-align:center;color:rgba(255,255,255,0.2);font-size:.8rem}
+        .footer i{color:#f87171;margin:0 4px}
+        @media(max-width:768px){.container{padding:25px}.header h1{font-size:2rem}.features-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr;gap:10px}}
+        @media(max-width:480px){.container{padding:18px}.header h1{font-size:1.5rem}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-badge"><i class="fas fa-shield-alt"></i> AI-Powered</div>
+            <h1>🛡️ FraudShield</h1>
+            <p>Real-time credit card fraud detection using machine learning</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><span class="number blue" id="totalTransactions">-</span><span class="label"><i class="fas fa-credit-card"></i> Total Transactions</span></div>
+            <div class="stat-card"><span class="number green" id="fraudPercentage">-</span><span class="label"><i class="fas fa-check-circle"></i> Fraud Detection Rate</span></div>
+            <div class="stat-card"><span class="number red" id="modelAccuracy">-</span><span class="label"><i class="fas fa-robot"></i> Model Confidence</span></div>
+        </div>
+        <div class="form-title"><i class="fas fa-edit"></i> Enter Transaction Details</div>
+        <form id="predictionForm">
+            <div id="featureInputs" class="features-grid"></div>
+            <button type="submit" class="btn-submit"><i class="fas fa-shield-alt"></i> Analyze Transaction <i class="fas fa-arrow-right"></i></button>
+        </form>
+        <div class="loading" id="loading"><div class="spinner"></div><p><i class="fas fa-microchip"></i> Analyzing transaction with AI...</p></div>
+        <div id="resultContainer" class="result">
+            <div class="result-header"><span class="icon" id="resultIcon"></span><h2 id="resultTitle"></h2></div>
+            <p id="resultMessage"></p>
+            <div class="probability-container">
+                <div class="probability-label"><span>Fraud Probability</span><span id="probabilityText">0%</span></div>
+                <div class="probability-bar"><div class="probability-fill" id="probabilityFill" style="width:0%"></div></div>
+            </div>
+            <div id="riskBadge"></div>
+        </div>
+        <div id="errorContainer" class="error"></div>
+        <div class="footer"><i class="fas fa-lock"></i> Secure &bull; Powered by <a href="#" onclick="return false;" style="color:rgba(255,255,255,0.3);text-decoration:none;">Random Forest AI</a> &bull; <i class="fas fa-heart" style="color:#f87171;"></i> Real-time</div>
+    </div>
+    <script>
+        const featureNames = ["cc_num", "amt", "zip", "lat", "long", "city_pop", "unix_time", "merch_lat", "merch_long"];
+        const featureInputs = document.getElementById('featureInputs');
+        featureNames.forEach((name,index)=>{
+            const div=document.createElement('div');
+            div.className='input-group';
+            const displayName=name.replace(/_/g,' ').toUpperCase();
+            div.innerHTML=`<label>${displayName}</label><input type="text" id="feature_${index}" placeholder="Enter ${name}" required>`;
+            featureInputs.appendChild(div);
+        });
+        document.getElementById('predictionForm').addEventListener('submit',async function(e){
+            e.preventDefault();
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultContainer').className='result';
+            document.getElementById('errorContainer').className='error';
+            document.getElementById('errorContainer').textContent='';
+            const features=[];
+            let valid=true;
+            for(let i=0;i<featureNames.length;i++){
+                const input=document.getElementById(`feature_${i}`);
+                const value=input.value.trim();
+                const numValue=parseFloat(value);
+                if(isNaN(numValue)||value===''){
+                    input.style.borderColor='#f87171';
+                    document.getElementById('errorContainer').textContent=`Please enter a valid number for ${featureNames[i]}`;
+                    document.getElementById('errorContainer').className='error show';
+                    valid=false;
+                    break;
+                }else{
+                    input.style.borderColor='rgba(255,255,255,0.1)';
+                }
+                features.push(numValue);
+            }
+            if(!valid){document.getElementById('loading').classList.remove('show');return;}
+            try{
+                const response=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({features:features})});
+                const result=await response.json();
+                document.getElementById('loading').classList.remove('show');
+                if(response.ok){
+                    const container=document.getElementById('resultContainer');
+                    const title=document.getElementById('resultTitle');
+                    const message=document.getElementById('resultMessage');
+                    const fill=document.getElementById('probabilityFill');
+                    const text=document.getElementById('probabilityText');
+                    const icon=document.getElementById('resultIcon');
+                    const badge=document.getElementById('riskBadge');
+                    const fraudProb=(result.probability_fraud*100).toFixed(2);
+                    const riskLevel=result.probability_fraud>0.7?'High':result.probability_fraud>0.3?'Medium':'Low';
+                    if(result.is_fraud){
+                        container.className='result show fraud';
+                        title.textContent='Fraudulent Transaction Detected!';
+                        message.textContent='This transaction has been flagged as potentially fraudulent.';
+                        icon.textContent='🚨';
+                    }else{
+                        container.className='result show safe';
+                        title.textContent='Transaction Appears Safe';
+                        message.textContent='This transaction appears legitimate.';
+                        icon.textContent='✅';
+                    }
+                    setTimeout(()=>{fill.style.width=fraudProb+'%';},100);
+                    text.textContent=fraudProb+'%';
+                    const riskClass=riskLevel.toLowerCase();
+                    badge.innerHTML=`<span class="risk-badge ${riskClass}">${riskLevel} Risk</span>`;
+                }else{
+                    document.getElementById('errorContainer').textContent=`Error: ${result.error||'Something went wrong'}`;
+                    document.getElementById('errorContainer').className='error show';
+                }
+            }catch(error){
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('errorContainer').textContent=`Connection Error: ${error.message}`;
+                document.getElementById('errorContainer').className='error show';
+            }
+        });
+    </script>
+</body>
+</html>
